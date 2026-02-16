@@ -39,4 +39,4 @@ React's component-based architecture enables reusable UI elements (product cards
 
 ## AI Assistance in Decision
 
-AI (Claude) was used to help draft this ADR, compare pros and cons of frontend frameworks, and refine the wording. The final decision to use React with TypeScript was reviewed and confirmed by the student based on course requirements and project needs. AI did not independently make the final decision.
+AI (Claude Opus4.6) was used to help draft this ADR, compare pros and cons of frontend frameworks, and refine the wording. The final decision to use React with TypeScript was reviewed and confirmed by the student based on course requirements and project needs. AI did not independently make the final decision.
