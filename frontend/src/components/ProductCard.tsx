@@ -1,13 +1,33 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import type { CSSProperties } from "react";
+import type { CSSProperties, MouseEvent } from "react";
 import type { Product } from "../types";
+import { useCartContext } from "../context/CartProvider";
 
-// The parent (ProductListPage) passes in one product object.
 interface ProductCardProps {
   product: Product;
 }
 
 function ProductCard({ product }: ProductCardProps) {
+  const { dispatch } = useCartContext();
+  const [added, setAdded] = useState(false);
+
+  function handleAddToCart(e: MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    dispatch({
+      type: "ADD_TO_CART",
+      productId: product.id,
+      productName: product.title,
+      price: product.price,
+      imageUrl: product.imageUrl,
+    });
+
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  }
+
   return (
     <Link to={`/products/${product.id}`} style={styles.link}>
       <div style={styles.card}>
@@ -16,12 +36,19 @@ function ProductCard({ product }: ProductCardProps) {
           alt={product.title}
           style={styles.image}
         />
-
         <div style={styles.body}>
           <h3 style={styles.title}>{product.title}</h3>
           <p style={styles.price}>${product.price.toFixed(2)}</p>
           <p style={styles.meta}>{product.category}</p>
           <p style={styles.meta}>Sold by {product.sellerName}</p>
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            aria-label={`Add ${product.title} to cart`}
+            style={styles.button}
+          >
+            {added ? "Added!" : "Add to Cart"}
+          </button>
         </div>
       </div>
     </Link>
@@ -66,6 +93,17 @@ const styles: Record<string, CSSProperties> = {
     margin: "0 0 4px 0",
     fontSize: "13px",
     color: "#666",
+  },
+  button: {
+    marginTop: "8px",
+    padding: "8px 16px",
+    backgroundColor: "#bb0000",
+    color: "#fff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    width: "100%",
+    fontSize: "14px",
   },
 };
 

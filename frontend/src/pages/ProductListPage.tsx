@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import type { CSSProperties } from "react";
 import type { Product } from "../types";
 import ProductCard from "../components/ProductCard";
+import { useCartContext } from "../context/CartProvider";
 
 function ProductListPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const { cartItemCount } = useCartContext();
 
   useEffect(() => {
     fetch("http://localhost:5000/api/products")
@@ -30,7 +33,19 @@ function ProductListPage() {
 
   return (
     <div style={styles.page}>
-      <h1 style={styles.heading}>Buckeye Marketplace</h1>
+      <div style={styles.header}>
+        <h1 style={styles.heading}>Buckeye Marketplace</h1>
+        <Link
+          to="/cart"
+          style={styles.cartButton}
+          aria-label={`Shopping cart with ${cartItemCount} items`}
+        >
+          🛒
+          {cartItemCount > 0 && (
+            <span style={styles.badge}>{cartItemCount}</span>
+          )}
+        </Link>
+      </div>
 
       <div style={styles.grid}>
         {products.map((product) => (
@@ -47,10 +62,42 @@ const styles: Record<string, CSSProperties> = {
     margin: "0 auto",
     padding: "24px",
   },
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "24px",
+  },
   heading: {
     fontSize: "28px",
-    marginBottom: "24px",
+    margin: 0,
     color: "#bb0000",
+  },
+  cartButton: {
+    position: "relative",
+    fontSize: "28px",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    padding: "4px 8px",
+    textDecoration: "none",
+    color: "inherit",
+  },
+  badge: {
+    position: "absolute",
+    top: "-4px",
+    right: "-4px",
+    backgroundColor: "#bb0000",
+    color: "#fff",
+    borderRadius: "50%",
+    fontSize: "12px",
+    fontWeight: "bold",
+    minWidth: "18px",
+    height: "18px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "0 4px",
   },
   grid: {
     display: "grid",
