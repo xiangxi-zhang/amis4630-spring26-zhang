@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import type { CSSProperties } from "react";
 import type { Product } from "../types";
+import { useCart } from "../context/CartContext";
 
 function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { addItem, successMessage, error } = useCart();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,6 +34,12 @@ function ProductDetailPage() {
         setLoading(false);
       });
   }, [id]);
+
+  const handleAddToCart = async () => {
+    if (product) {
+      await addItem(product.id, 1);
+    }
+  };
 
   if (loading) {
     return <p style={styles.message}>Loading product…</p>;
@@ -78,6 +86,13 @@ function ProductDetailPage() {
           </p>
 
           <p style={styles.description}>{product.description}</p>
+
+          <button style={styles.button} onClick={handleAddToCart}>
+            Add to Cart
+          </button>
+
+          {successMessage && <p style={styles.success}>{successMessage}</p>}
+          {error && <p style={styles.error}>{error}</p>}
         </div>
       </div>
     </div>
@@ -131,9 +146,29 @@ const styles: Record<string, CSSProperties> = {
   },
   description: {
     marginTop: "16px",
+    marginBottom: "20px",
     fontSize: "15px",
     lineHeight: "1.6",
     color: "#444",
+  },
+  button: {
+    width: "100%",
+    padding: "12px",
+    border: "none",
+    borderRadius: "6px",
+    backgroundColor: "#bb0000",
+    color: "#fff",
+    fontWeight: "bold",
+    cursor: "pointer",
+    fontSize: "16px",
+  },
+  success: {
+    marginTop: "12px",
+    color: "#2e7d32",
+  },
+  error: {
+    marginTop: "12px",
+    color: "#b00020",
   },
   message: {
     textAlign: "center",

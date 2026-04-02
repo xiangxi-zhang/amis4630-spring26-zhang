@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using backend.Models;
+using backend.Data;
 
 namespace backend.Controllers;
 
@@ -7,108 +9,24 @@ namespace backend.Controllers;
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
 {
-    private static readonly List<Product> _products = new()
+    private readonly MarketplaceContext _context;
+
+    public ProductsController(MarketplaceContext context)
     {
-        new Product
-        {
-            Id = 1,
-            Title = "OSU Scarlet Hoodie - Size L",
-            Description = "Comfortable Ohio State scarlet hoodie with a classic Block O design. Great for campus wear, game days, and everyday style.",
-            Price = 42.00m,
-            Category = "Apparel",
-            SellerName = "Buckeye Marketplace",
-            PostedDate = new DateTime(2025, 3, 1),
-            ImageUrl = "https://picsum.photos/seed/1/200"
-        },
-        new Product
-        {
-            Id = 2,
-            Title = "Gray Buckeyes Baseball Cap",
-            Description = "Adjustable gray baseball cap with embroidered Buckeyes logo. A simple and versatile fan essential.",
-            Price = 24.00m,
-            Category = "Fan Gear",
-            SellerName = "Buckeye Marketplace",
-            PostedDate = new DateTime(2025, 3, 2),
-            ImageUrl = "https://picsum.photos/seed/2/200"
-        },
-        new Product
-        {
-            Id = 3,
-            Title = "OSU Ceramic Mug Gift Set",
-            Description = "A gift-ready mug set featuring Ohio State themed graphics. Ideal for alumni, parents, or holiday presents.",
-            Price = 28.00m,
-            Category = "Gifts",
-            SellerName = "Buckeye Marketplace",
-            PostedDate = new DateTime(2025, 3, 3),
-            ImageUrl = "https://picsum.photos/seed/3/200"
-        },
-        new Product
-        {
-            Id = 4,
-            Title = "Ohio State Diploma Frame - Cherry Wood",
-            Description = "Premium cherry wood diploma frame with an elegant Ohio State design. A polished keepsake for graduates and families.",
-            Price = 120.00m,
-            Category = "Premium Gifts",
-            SellerName = "Buckeye Marketplace",
-            PostedDate = new DateTime(2025, 3, 4),
-            ImageUrl = "https://picsum.photos/seed/4/200"
-        },
-        new Product
-        {
-            Id = 5,
-            Title = "Wireless Earbuds for Study and Travel",
-            Description = "Compact wireless earbuds with charging case, ideal for commuting, studying, and everyday use on campus.",
-            Price = 39.00m,
-            Category = "Electronics",
-            SellerName = "Campus Tech Store",
-            PostedDate = new DateTime(2025, 3, 5),
-            ImageUrl = "https://picsum.photos/seed/5/200"
-        },
-        new Product
-        {
-            Id = 6,
-            Title = "Block O Laptop Sleeve",
-            Description = "Protective laptop sleeve with a clean Ohio State inspired design. Fits most 13-inch laptops and tablets.",
-            Price = 26.00m,
-            Category = "Accessories",
-            SellerName = "Buckeye Marketplace",
-            PostedDate = new DateTime(2025, 3, 6),
-            ImageUrl = "https://picsum.photos/seed/6/200"
-        },
-        new Product
-        {
-            Id = 7,
-            Title = "Buckeye Game Day Scarf",
-            Description = "Soft scarlet and gray scarf made for chilly game days, tailgates, and fall campus events.",
-            Price = 19.00m,
-            Category = "Fan Gear",
-            SellerName = "Buckeye Marketplace",
-            PostedDate = new DateTime(2025, 3, 7),
-            ImageUrl = "https://picsum.photos/seed/7/200"
-        },
-        new Product
-        {
-            Id = 8,
-            Title = "Buckeye Alumni Premium Gift Box",
-            Description = "Curated alumni gift box including a journal, tumbler, and Ohio State themed accessories. Designed for premium gifting.",
-            Price = 85.00m,
-            Category = "Premium Gifts",
-            SellerName = "Buckeye Marketplace",
-            PostedDate = new DateTime(2025, 3, 8),
-            ImageUrl = "https://picsum.photos/seed/8/200"
-        }
-    };
+        _context = context;
+    }
 
     [HttpGet]
-    public ActionResult<List<Product>> GetAll()
+    public async Task<ActionResult<List<Product>>> GetAll()
     {
-        return Ok(_products);
+        var products = await _context.Products.OrderBy(p => p.Id).ToListAsync();
+        return Ok(products);
     }
 
     [HttpGet("{id}")]
-    public ActionResult<Product> GetById(int id)
+    public async Task<ActionResult<Product>> GetById(int id)
     {
-        var product = _products.FirstOrDefault(p => p.Id == id);
+        var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
 
         if (product == null)
         {

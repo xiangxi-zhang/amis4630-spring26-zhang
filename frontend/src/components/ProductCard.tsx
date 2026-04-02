@@ -1,13 +1,21 @@
 import { Link } from "react-router-dom";
 import type { CSSProperties } from "react";
 import type { Product } from "../types";
+import { useCart } from "../context/CartContext";
 
-// The parent (ProductListPage) passes in one product object.
 interface ProductCardProps {
   product: Product;
 }
 
 function ProductCard({ product }: ProductCardProps) {
+  const { addItem } = useCart();
+
+  const handleAddToCart = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    await addItem(product.id, 1);
+  };
+
   return (
     <Link to={`/products/${product.id}`} style={styles.link}>
       <div style={styles.card}>
@@ -22,6 +30,10 @@ function ProductCard({ product }: ProductCardProps) {
           <p style={styles.price}>${product.price.toFixed(2)}</p>
           <p style={styles.meta}>{product.category}</p>
           <p style={styles.meta}>Sold by {product.sellerName}</p>
+
+          <button style={styles.button} onClick={handleAddToCart}>
+            Add to Cart
+          </button>
         </div>
       </div>
     </Link>
@@ -66,6 +78,17 @@ const styles: Record<string, CSSProperties> = {
     margin: "0 0 4px 0",
     fontSize: "13px",
     color: "#666",
+  },
+  button: {
+    marginTop: "12px",
+    width: "100%",
+    padding: "10px",
+    border: "none",
+    borderRadius: "6px",
+    backgroundColor: "#bb0000",
+    color: "#fff",
+    fontWeight: "bold",
+    cursor: "pointer",
   },
 };
 

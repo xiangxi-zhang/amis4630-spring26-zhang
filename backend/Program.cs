@@ -1,4 +1,10 @@
+using Microsoft.EntityFrameworkCore;
+using backend.Data;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<MarketplaceContext>(options =>
+    options.UseSqlite("Data Source=buckeyemarketplace.db"));
 
 // Register services
 builder.Services.AddControllers();
