@@ -2,4 +2,6 @@
 **/bin/
 **/obj/
 **/dist/
+*.db-shm
+*.db-wal
 .DS_Store
