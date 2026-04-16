@@ -1,3 +1,5 @@
+import { authorizedFetch } from "./authService";
+
 const API_BASE = "http://localhost:5000/api";
 
 export interface CartItem {
@@ -19,7 +21,7 @@ export interface Cart {
 }
 
 export async function getCart(): Promise<Cart> {
-  const response = await fetch(`${API_BASE}/cart`);
+  const response = await authorizedFetch(`${API_BASE}/cart`);
   if (!response.ok) {
     throw new Error("Failed to load cart");
   }
@@ -27,11 +29,8 @@ export async function getCart(): Promise<Cart> {
 }
 
 export async function addToCart(productId: number, quantity = 1): Promise<Cart> {
-  const response = await fetch(`${API_BASE}/cart`, {
+  const response = await authorizedFetch(`${API_BASE}/cart`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify({ productId, quantity }),
   });
 
@@ -43,11 +42,8 @@ export async function addToCart(productId: number, quantity = 1): Promise<Cart> 
 }
 
 export async function updateCartItem(cartItemId: number, quantity: number): Promise<Cart> {
-  const response = await fetch(`${API_BASE}/cart/${cartItemId}`, {
+  const response = await authorizedFetch(`${API_BASE}/cart/${cartItemId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify({ quantity }),
   });
 
@@ -59,7 +55,7 @@ export async function updateCartItem(cartItemId: number, quantity: number): Prom
 }
 
 export async function removeCartItem(cartItemId: number): Promise<Cart> {
-  const response = await fetch(`${API_BASE}/cart/${cartItemId}`, {
+  const response = await authorizedFetch(`${API_BASE}/cart/${cartItemId}`, {
     method: "DELETE",
   });
 
@@ -71,7 +67,7 @@ export async function removeCartItem(cartItemId: number): Promise<Cart> {
 }
 
 export async function clearCart(): Promise<Cart> {
-  const response = await fetch(`${API_BASE}/cart/clear`, {
+  const response = await authorizedFetch(`${API_BASE}/cart/clear`, {
     method: "DELETE",
   });
 

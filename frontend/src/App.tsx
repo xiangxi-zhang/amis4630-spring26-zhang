@@ -3,10 +3,18 @@ import type { CSSProperties } from "react";
 import ProductListPage from "./pages/ProductListPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import OrderHistoryPage from "./pages/OrderHistoryPage";
+import OrderConfirmationPage from "./pages/OrderConfirmationPage";
+import AdminPage from "./pages/AdminPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 import { CartProvider, useCart } from "./context/CartContext";
+import { useAuth } from "./context/AuthContext";
 
 function Header() {
   const { cart } = useCart();
+  const { isAuthenticated, logout } = useAuth();
 
   return (
     <header style={styles.header}>
@@ -14,9 +22,38 @@ function Header() {
         Buckeye Marketplace
       </Link>
 
-      <Link to="/cart" style={styles.cartLink}>
-        Cart ({cart?.totalItems ?? 0})
-      </Link>
+      <div style={styles.nav}>
+        <Link to="/" style={styles.navLink}>
+          Products
+        </Link>
+
+        <Link to="/cart" style={styles.navLink}>
+          Cart ({cart?.totalItems ?? 0})
+        </Link>
+
+        {isAuthenticated ? (
+          <>
+            <Link to="/orders" style={styles.navLink}>
+              My Orders
+            </Link>
+            <Link to="/admin" style={styles.navLink}>
+              Admin
+            </Link>
+            <button onClick={logout} style={styles.logoutButton}>
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/login" style={styles.navLink}>
+              Login
+            </Link>
+            <Link to="/register" style={styles.navLink}>
+              Register
+            </Link>
+          </>
+        )}
+      </div>
     </header>
   );
 }
@@ -28,7 +65,40 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<ProductListPage />} />
         <Route path="/products/:id" element={<ProductDetailPage />} />
-        <Route path="/cart" element={<CartPage />} />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <CartPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <OrderHistoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/order-confirmation"
+          element={
+            <ProtectedRoute>
+              <OrderConfirmationPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
@@ -50,6 +120,8 @@ const styles: Record<string, CSSProperties> = {
     padding: "16px 24px",
     borderBottom: "1px solid #ddd",
     backgroundColor: "#fff",
+    gap: "16px",
+    flexWrap: "wrap",
   },
   logo: {
     fontSize: "20px",
@@ -57,10 +129,25 @@ const styles: Record<string, CSSProperties> = {
     color: "#bb0000",
     textDecoration: "none",
   },
-  cartLink: {
+  nav: {
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+    flexWrap: "wrap",
+  },
+  navLink: {
     color: "#bb0000",
     textDecoration: "none",
     fontSize: "16px",
+    fontWeight: "bold",
+  },
+  logoutButton: {
+    border: "none",
+    backgroundColor: "#bb0000",
+    color: "#fff",
+    padding: "8px 12px",
+    borderRadius: "8px",
+    cursor: "pointer",
     fontWeight: "bold",
   },
 };

@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using backend.Data;
@@ -8,10 +10,10 @@ namespace backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class CartController : ControllerBase
 {
     private readonly MarketplaceContext _context;
-    private const string DemoUserId = "demo-user-1";
 
     public CartController(MarketplaceContext context)
     {
@@ -59,10 +61,12 @@ public class CartController : ControllerBase
     [HttpPut("{cartItemId}")]
     public async Task<ActionResult<CartResponse>> UpdateCartItem(int cartItemId, UpdateCartItemRequest request)
     {
+        var userId = GetCurrentUserId();
+
         var cartItem = await _context.CartItems
             .Include(ci => ci.Product)
             .Include(ci => ci.Cart)
-            .FirstOrDefaultAsync(ci => ci.Id == cartItemId);
+            .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.Cart.UserId == userId);
 
         if (cartItem == null)
         {
@@ -79,8 +83,11 @@ public class CartController : ControllerBase
     [HttpDelete("{cartItemId}")]
     public async Task<ActionResult<CartResponse>> RemoveCartItem(int cartItemId)
     {
+        var userId = GetCurrentUserId();
+
         var cartItem = await _context.CartItems
-            .FirstOrDefaultAsync(ci => ci.Id == cartItemId);
+            .Include(ci => ci.Cart)
+            .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.Cart.UserId == userId);
 
         if (cartItem == null)
         {
@@ -108,31 +115,26 @@ public class CartController : ControllerBase
         return Ok(MapCartResponse(cart));
     }
 
-    private async Task<Cart> EnsureCartExistsAsync()
+    private string GetCurrentUserId()
     {
-        var cart = await _context.Carts
-            .FirstOrDefaultAsync(c => c.UserId == DemoUserId);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        if (cart == null)
+        if (string.IsNullOrWhiteSpace(userId))
         {
-            cart = new Cart
-            {
-                UserId = DemoUserId
-            };
-
-            _context.Carts.Add(cart);
-            await _context.SaveChangesAsync();
+            throw new UnauthorizedAccessException("User ID claim is missing.");
         }
 
-        return cart;
+        return userId;
     }
 
     private async Task<Cart> GetOrCreateCartAsync()
     {
+        var userId = GetCurrentUserId();
+
         var existingCart = await _context.Carts
             .Include(c => c.Items)
                 .ThenInclude(i => i.Product)
-            .FirstOrDefaultAsync(c => c.UserId == DemoUserId);
+            .FirstOrDefaultAsync(c => c.UserId == userId);
 
         if (existingCart != null)
         {
@@ -141,7 +143,7 @@ public class CartController : ControllerBase
 
         var newCart = new Cart
         {
-            UserId = DemoUserId
+            UserId = userId
         };
 
         _context.Carts.Add(newCart);
@@ -152,10 +154,12 @@ public class CartController : ControllerBase
 
     private async Task<Cart> LoadCartAsync(int cartId)
     {
+        var userId = GetCurrentUserId();
+
         return await _context.Carts
             .Include(c => c.Items)
                 .ThenInclude(i => i.Product)
-            .FirstAsync(c => c.Id == cartId);
+            .FirstAsync(c => c.Id == cartId && c.UserId == userId);
     }
 
     private CartResponse MapCartResponse(Cart cart)

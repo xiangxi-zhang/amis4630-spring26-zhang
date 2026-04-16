@@ -1,9 +1,40 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import type { CSSProperties } from "react";
 import { useCart } from "../context/CartContext";
+import { placeOrder } from "../services/orderService";
 
 function CartPage() {
   const { cart, loading, error, successMessage, updateItem, removeItem, clearAll } = useCart();
+  const navigate = useNavigate();
+
+  const [shippingAddress, setShippingAddress] = useState("");
+  const [checkoutError, setCheckoutError] = useState("");
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+
+  async function handlePlaceOrder() {
+    setCheckoutError("");
+
+    if (!shippingAddress.trim()) {
+      setCheckoutError("Shipping address is required.");
+      return;
+    }
+
+    try {
+      setIsPlacingOrder(true);
+      const order = await placeOrder(shippingAddress);
+
+      navigate("/order-confirmation", {
+        state: { order },
+      });
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to place order.";
+      setCheckoutError(message);
+    } finally {
+      setIsPlacingOrder(false);
+    }
+  }
 
   if (loading) {
     return <p style={styles.message}>Loading cart…</p>;
@@ -40,7 +71,9 @@ function CartPage() {
                 <div style={styles.quantityRow}>
                   <button
                     style={styles.qtyBtn}
-                    onClick={() => updateItem(item.cartItemId, Math.max(1, item.quantity - 1))}
+                    onClick={() =>
+                      updateItem(item.cartItemId, Math.max(1, item.quantity - 1))
+                    }
                     disabled={item.quantity <= 1}
                   >
                     −
@@ -56,10 +89,15 @@ function CartPage() {
                   </button>
                 </div>
 
-                <p style={styles.lineTotal}>Subtotal: ${item.lineTotal.toFixed(2)}</p>
+                <p style={styles.lineTotal}>
+                  Subtotal: ${item.lineTotal.toFixed(2)}
+                </p>
               </div>
 
-              <button style={styles.removeBtn} onClick={() => removeItem(item.cartItemId)}>
+              <button
+                style={styles.removeBtn}
+                onClick={() => removeItem(item.cartItemId)}
+              >
                 Remove
               </button>
             </div>
@@ -67,11 +105,41 @@ function CartPage() {
 
           <div style={styles.summary}>
             <p style={styles.totalText}>
-              Total ({cart.totalItems} items): <strong>${cart.totalAmount.toFixed(2)}</strong>
+              Total ({cart.totalItems} items):{" "}
+              <strong>${cart.totalAmount.toFixed(2)}</strong>
             </p>
 
             <button style={styles.clearBtn} onClick={clearAll}>
               Clear Cart
+            </button>
+          </div>
+
+          <div style={styles.checkoutCard}>
+            <h2 style={styles.checkoutTitle}>Checkout</h2>
+
+            <label htmlFor="shippingAddress" style={styles.label}>
+              Shipping Address
+            </label>
+
+            <textarea
+              id="shippingAddress"
+              value={shippingAddress}
+              onChange={(event) => setShippingAddress(event.target.value)}
+              placeholder="Enter your shipping address"
+              style={styles.textarea}
+              rows={4}
+            />
+
+            {checkoutError ? (
+              <p style={styles.error}>{checkoutError}</p>
+            ) : null}
+
+            <button
+              style={styles.placeOrderBtn}
+              onClick={handlePlaceOrder}
+              disabled={isPlacingOrder}
+            >
+              {isPlacingOrder ? "Placing Order..." : "Place Order"}
             </button>
           </div>
         </>
@@ -178,6 +246,8 @@ const styles: Record<string, CSSProperties> = {
     alignItems: "center",
     marginTop: "24px",
     paddingTop: "16px",
+    gap: "16px",
+    flexWrap: "wrap",
   },
   totalText: {
     fontSize: "20px",
@@ -189,6 +259,42 @@ const styles: Record<string, CSSProperties> = {
     color: "#fff",
     borderRadius: "4px",
     cursor: "pointer",
+  },
+  checkoutCard: {
+    marginTop: "32px",
+    border: "1px solid #ddd",
+    borderRadius: "12px",
+    padding: "20px",
+    backgroundColor: "#fff",
+  },
+  checkoutTitle: {
+    marginTop: 0,
+    color: "#bb0000",
+  },
+  label: {
+    display: "block",
+    marginBottom: "8px",
+    fontWeight: "bold",
+  },
+  textarea: {
+    width: "100%",
+    padding: "12px",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+    fontSize: "16px",
+    boxSizing: "border-box",
+    marginBottom: "12px",
+    resize: "vertical",
+  },
+  placeOrderBtn: {
+    padding: "12px 18px",
+    border: "none",
+    backgroundColor: "#bb0000",
+    color: "#fff",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontSize: "16px",
+    fontWeight: "bold",
   },
 };
 
