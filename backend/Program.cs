@@ -41,7 +41,9 @@ var jwtKey = builder.Configuration["Jwt:Key"];
 
 if (string.IsNullOrWhiteSpace(jwtKey))
 {
-    throw new InvalidOperationException("JWT key is missing. Set it with user-secrets or Azure App Service environment variables.");
+    throw new InvalidOperationException(
+        "JWT key is missing. Set it with user-secrets or Azure App Service environment variables."
+    );
 }
 
 builder.Services
@@ -58,7 +60,9 @@ builder.Services
             ValidateIssuer = false,
             ValidateAudience = false,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtKey)
+            ),
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
         };
@@ -118,7 +122,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 "http://localhost:5173",
-                "https://localhost:5173"
+                "https://localhost:5173",
+                "https://xiangxi-zhang.github.io"
             )
             .AllowAnyHeader()
             .AllowAnyMethod();
