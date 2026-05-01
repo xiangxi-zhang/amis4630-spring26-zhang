@@ -60,11 +60,12 @@ function Header() {
 
 function AppContent() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/amis4630-spring26-zhang">
       <Header />
       <Routes>
         <Route path="/" element={<ProductListPage />} />
         <Route path="/products/:id" element={<ProductDetailPage />} />
+
         <Route
           path="/cart"
           element={
@@ -73,8 +74,10 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+
         <Route
           path="/orders"
           element={
@@ -83,6 +86,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/order-confirmation"
           element={
@@ -91,6 +95,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin"
           element={
