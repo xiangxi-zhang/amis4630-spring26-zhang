@@ -1,6 +1,6 @@
 import { authorizedFetch } from "./authService";
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 export interface CartItem {
   cartItemId: number;
@@ -41,7 +41,10 @@ export async function addToCart(productId: number, quantity = 1): Promise<Cart> 
   return response.json();
 }
 
-export async function updateCartItem(cartItemId: number, quantity: number): Promise<Cart> {
+export async function updateCartItem(
+  cartItemId: number,
+  quantity: number
+): Promise<Cart> {
   const response = await authorizedFetch(`${API_BASE}/cart/${cartItemId}`, {
     method: "PUT",
     body: JSON.stringify({ quantity }),

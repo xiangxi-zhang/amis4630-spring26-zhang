@@ -3,12 +3,15 @@ import type { CSSProperties } from "react";
 import type { Product } from "../types";
 import ProductCard from "../components/ProductCard";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+
 function ProductListPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/products")
+    fetch(`${API_BASE_URL}/products`)
       .then((response) => response.json())
       .then((data) => {
         setProducts(data);

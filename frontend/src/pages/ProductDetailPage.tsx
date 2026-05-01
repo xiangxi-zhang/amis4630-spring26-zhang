@@ -4,6 +4,9 @@ import type { CSSProperties } from "react";
 import type { Product } from "../types";
 import { useCart } from "../context/CartContext";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+
 function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { addItem, successMessage, error } = useCart();
@@ -13,7 +16,7 @@ function ProductDetailPage() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/products/${id}`)
+    fetch(`${API_BASE_URL}/products/${id}`)
       .then((response) => {
         if (!response.ok) {
           setNotFound(true);
@@ -49,21 +52,21 @@ function ProductDetailPage() {
     return (
       <div style={styles.page}>
         <p style={styles.message}>Product not found.</p>
-        <Link to="/" style={styles.backLink}>← Back to all products</Link>
+        <Link to="/" style={styles.backLink}>
+          ← Back to all products
+        </Link>
       </div>
     );
   }
 
   return (
     <div style={styles.page}>
-      <Link to="/" style={styles.backLink}>← Back to all products</Link>
+      <Link to="/" style={styles.backLink}>
+        ← Back to all products
+      </Link>
 
       <div style={styles.detailCard}>
-        <img
-          src={product.imageUrl}
-          alt={product.title}
-          style={styles.image}
-        />
+        <img src={product.imageUrl} alt={product.title} style={styles.image} />
 
         <div style={styles.info}>
           <h1 style={styles.title}>{product.title}</h1>
