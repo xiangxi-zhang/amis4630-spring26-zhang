@@ -14,7 +14,16 @@ var connectionString =
     ?? "Data Source=buckeyemarketplace.db";
 
 builder.Services.AddDbContext<MarketplaceContext>(options =>
-    options.UseSqlite(connectionString));
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        options.UseSqlite(connectionString);
+    }
+    else
+    {
+        options.UseSqlServer(connectionString);
+    }
+});
 
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -32,7 +41,7 @@ var jwtKey = builder.Configuration["Jwt:Key"];
 
 if (string.IsNullOrWhiteSpace(jwtKey))
 {
-    throw new InvalidOperationException("JWT key is missing. Set it with user-secrets.");
+    throw new InvalidOperationException("JWT key is missing. Set it with user-secrets or Azure App Service environment variables.");
 }
 
 builder.Services
@@ -73,7 +82,7 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "backend",
+        Title = "Buckeye Marketplace API",
         Version = "v1"
     });
 
@@ -107,9 +116,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.WithOrigins(
+                "http://localhost:5173",
+                "https://localhost:5173"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
@@ -124,11 +136,8 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedRolesAndAdminAsync(services);
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
@@ -138,6 +147,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run("http://localhost:5000");
+app.Run();
 
 public partial class Program { }
